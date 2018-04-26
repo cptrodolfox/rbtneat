@@ -208,7 +208,7 @@ class CircuitGenome(object):
         del_key, del_node = choice(available_nodes)
 
         connections_to_delete = set()
-        for k, v in iteritems(self.connections):
+        for k, v in self.connections.items():
             if del_key in v.key:
                 connections_to_delete.add(v.key)
 
