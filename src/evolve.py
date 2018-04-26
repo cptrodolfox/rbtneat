@@ -175,7 +175,7 @@ class CircuitGenome(object):
         key = (input_key, output_key)
         connection = CircuitConnectionGene(key)
         connection.init_attributes(config)
-        self.connections[key] = connection
+        self.connections.add(key, connection)
 
     def mutate_add_connection(self, config):
         '''
@@ -197,7 +197,7 @@ class CircuitGenome(object):
         #     return
 
         cg = self.create_connection(config, in_node, out_node)
-        self.connections[cg.key] = cg
+        self.connections.add(cg.key, cg.value)
 
     def mutate_delete_node(self, config):
         # Do nothing if there are no non-output nodes.
@@ -213,7 +213,7 @@ class CircuitGenome(object):
                 connections_to_delete.add(v.key)
 
         for key in connections_to_delete:
-            del self.connections[key]
+            self.connections.remove(key)
 
         del self.nodes[del_key]
 
@@ -222,7 +222,7 @@ class CircuitGenome(object):
     def mutate_delete_connection(self):
         if self.connections:
             key = choice(list(self.connections.keys()))
-            del self.connections[key]
+            self.connections.remove(key)
 
     def distance(self, other, config):
         """
@@ -265,7 +265,7 @@ class CircuitGenome(object):
                     # Homologous genes compute their own distance value.
                     connection_distance += c1.distance(c2, config)
 
-            max_conn = max(len(self.connections), len(other.connections))
+            max_conn = max(self.connections.depth, other.connections.depth)
             connection_distance = (connection_distance + config.compatibility_disjoint_coefficient * disjoint_connections) / max_conn
 
         distance = node_distance + connection_distance
