@@ -84,7 +84,7 @@ class CircuitGenome(object):
 
         # (gene_key, gene) pairs for gene sets.
         self.connections = RBTree()
-        self.nodes = RBTree()
+        self.nodes = {}
 
         # Fitness results.
         self.fitness = None
@@ -122,14 +122,14 @@ class CircuitGenome(object):
             parent1, parent2 = genome2, genome1
 
         # Inherit connection genes
-        for key, cg1 in iteritems(parent1.connections):
+        for key, cg1 in parent1.connections.items():
             cg2 = parent2.connections.get(key)
             if cg2 is None:
                 # Excess or disjoint gene: copy from the fittest parent.
-                self.connections[key] = cg1.copy()
+                self.connections.add(key,cg1.copy())
             else:
                 # Homologous gene: combine genes from both parents.
-                self.connections[key] = cg1.crossover(cg2)
+                self.connections.add(key,cg1.crossover(cg2))
 
         # Inherit node genes
         parent1_set = parent1.nodes
