@@ -271,11 +271,11 @@ class CircuitGenome(object):
         distance = node_distance + connection_distance
 
         return distance
-
     def size(self):
         '''Returns genome 'complexity', taken to be (number of nodes, number of enabled connections)'''
         num_enabled_connections = sum([1 for cg in self.connections.values() if cg.enabled is True])
         return len(self.nodes), num_enabled_connections
+
 
     def __str__(self):
         s = "Nodes:"
@@ -283,7 +283,7 @@ class CircuitGenome(object):
             s += "\n\t{0} {1!s}".format(k, ng)
         s += "\nConnections:"
         connections = list(self.connections.values())
-        connections.sort()
+        #connections.sort()
         for c in connections:
             s += "\n\t" + str(c)
         return s
