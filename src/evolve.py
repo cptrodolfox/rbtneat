@@ -152,7 +152,7 @@ class CircuitGenome(object):
         return new_id
 
     def mutate_add_node(self, config):
-        if not self.connections:
+        if self.connections.keys() == [None]:
             return None, None
 
         # Choose a random connection to split
@@ -220,7 +220,9 @@ class CircuitGenome(object):
         return del_key
 
     def mutate_delete_connection(self):
-        if self.connections:
+        
+        # Modify self.connections. This would check if the tree is not empty by checking if the list of keys has a value
+        if self.connections.keys() != [None]:
             key = choice(list(self.connections.keys()))
             self.connections.remove(key)
 
@@ -251,13 +253,13 @@ class CircuitGenome(object):
 
         # Compute connection gene differences.
         connection_distance = 0.0
-        if self.connections or other.connections:
+        if self.connections.keys() != [None] or other.connections.keys() != [None]:
             disjoint_connections = 0
-            for k2 in iterkeys(other.connections):
-                if k2 not in self.connections:
+            for k2 in other.connections.keys():
+                if k2 not in self.connections.keys():
                     disjoint_connections += 1
 
-            for k1, c1 in iteritems(self.connections):
+            for k1, c1 in self.connections.items():
                 c2 = other.connections.get(k1)
                 if c2 is None:
                     disjoint_connections += 1
@@ -265,6 +267,7 @@ class CircuitGenome(object):
                     # Homologous genes compute their own distance value.
                     connection_distance += c1.distance(c2, config)
 
+            # Check: Does a dictionary has the attribute depth?
             max_conn = max(self.connections.depth, other.connections.depth)
             connection_distance = (connection_distance + config.compatibility_disjoint_coefficient * disjoint_connections) / max_conn
 
@@ -282,7 +285,7 @@ class CircuitGenome(object):
         for k, ng in iteritems(self.nodes):
             s += "\n\t{0} {1!s}".format(k, ng)
         s += "\nConnections:"
-        connections = list(self.connections.values())
+        connections = self.connections.values()
         #connections.sort()
         for c in connections:
             s += "\n\t" + str(c)
@@ -303,7 +306,7 @@ class CircuitGenome(object):
         for input_id in config.input_keys:
             for node_id in iterkeys(self.nodes):
                 connection = self.create_connection(config, input_id, node_id)
-                self.connections[connection.key] = connection
+                self.connections.add(connection.key,connection)
 
     @staticmethod
     def create_node(config, node_id):
@@ -343,7 +346,7 @@ def create_circuit(genome, config):
     #circuit.R('test2', 'node0', 'input1', 1e6)
     ridx = 1
     xidx = 1
-    for key, c in iteritems(genome.connections):
+    for key, c in genome.connections.items():
         if c.component == 'resistor':
             pin0, pin1 = get_pins(key)
             R = 10 ** c.value
