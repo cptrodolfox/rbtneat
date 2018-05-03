@@ -267,8 +267,7 @@ class CircuitGenome(object):
                     # Homologous genes compute their own distance value.
                     connection_distance += c1.distance(c2, config)
 
-            # Check: Does a dictionary has the attribute depth?
-            max_conn = max(self.connections.depth, other.connections.depth)
+            max_conn = max(len(self.connections.keys()), len(other.connections.depth().keys()))
             connection_distance = (connection_distance + config.compatibility_disjoint_coefficient * disjoint_connections) / max_conn
 
         distance = node_distance + connection_distance
