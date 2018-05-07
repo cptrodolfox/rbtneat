@@ -554,7 +554,7 @@ class DefaultGenome(object):
         num_to_add = int(round(len(all_connections) * config.connection_fraction))
         for input_id, output_id in all_connections[:num_to_add]:
             connection = self.create_connection(config, input_id, output_id)
-            self.connections[connection.key] = connection
+            self.connections.add(connection.key, connection)
 
     def connect_partial_direct(self, config):
         """
@@ -567,4 +567,4 @@ class DefaultGenome(object):
         num_to_add = int(round(len(all_connections) * config.connection_fraction))
         for input_id, output_id in all_connections[:num_to_add]:
             connection = self.create_connection(config, input_id, output_id)
-            self.connections.add(connection.key,connection)
+            self.connections.add(connection.key, connection)
