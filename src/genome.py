@@ -7,6 +7,7 @@ from random import choice, random, shuffle
 
 import sys
 
+from rbt import Node, RBTree
 from neat.activations import ActivationFunctionSet
 from neat.aggregations import AggregationFunctionSet
 from neat.config import ConfigParameter, write_pretty_params
@@ -245,10 +246,10 @@ class DefaultGenome(object):
             cg2 = parent2.connections.get(key)
             if cg2 is None:
                 # Excess or disjoint gene: copy from the fittest parent.
-                self.connections.add(key,cg1.copy())
+                self.connections.insert(Node(key, cg1.copy()))
             else:
                 # Homologous gene: combine genes from both parents.
-                self.connections.add(key,cg1.crossover(cg2))
+                self.connections.insert(Node(key, cg1.crossover(cg2)))
 
         # Inherit node genes
         parent1_set = parent1.nodes
@@ -303,7 +304,7 @@ class DefaultGenome(object):
             ng.mutate(config)
 
     def mutate_add_node(self, config):
-        if not self.connections:
+        if self.connections.keys() == None:
             if config.check_structural_mutation_surer():
                 self.mutate_add_connection(config)
             return
@@ -334,7 +335,7 @@ class DefaultGenome(object):
         connection.init_attributes(config)
         connection.weight = weight
         connection.enabled = enabled
-        self.connections.add(key, connection)
+        self.connections.insert(Node(key, connection))
 
     def mutate_add_connection(self, config):
         """
@@ -349,7 +350,7 @@ class DefaultGenome(object):
 
         # Don't duplicate connections.
         key = (in_node, out_node)
-        if key in self.connections:
+        if key in self.connections.keys():
             # TODO: Should this be using mutation to/from rates? Hairy to configure...
             if config.check_structural_mutation_surer():
                 self.connections.get(key).enabled = True ############################################################## no lo se rick
@@ -363,11 +364,11 @@ class DefaultGenome(object):
         # they cannot be the output end of a connection (see above).
 
         # For feed-forward networks, avoid creating cycles.
-        if config.feed_forward and creates_cycle(list(iterkeys(self.connections)), key):
+        if config.feed_forward and creates_cycle(list(self.connections.keys()), key):
             return
 
         cg = self.create_connection(config, in_node, out_node)
-        self.connections.add(cg.key, cg) ############################################################## cg o cg.values()
+        self.connections.insert(Node(cg.key, cg)) ############################################################## cg o cg.values()
 
     def mutate_delete_node(self, config):
         # Do nothing if there are no non-output nodes.
@@ -378,12 +379,12 @@ class DefaultGenome(object):
         del_key = choice(available_nodes)
 
         connections_to_delete = set()
-        for k, v in iteritems(self.connections):
+        for k, v in self.connections.items():
             if del_key in v.key:
                 connections_to_delete.add(v.key)
 
         for key in connections_to_delete:
-            self.connections.remove(key)
+            self.connections.delete(key)
 
         del self.nodes[del_key]
 
@@ -392,9 +393,9 @@ class DefaultGenome(object):
     def mutate_delete_connection(self):
         if self.connections:
             key = choice(list(self.connections.keys()))
-            self.connections.remove(key)
+            self.connections.delete(key)
 
-    def distance(self, other, config):
+    def distance(self, other, config)
         """
         Returns the genetic distance between this genome and the other. This distance value
         is used to compute genome compatibility for speciation.
@@ -437,7 +438,7 @@ class DefaultGenome(object):
                     # Homologous genes compute their own distance value.
                     connection_distance += c1.distance(c2, config)
 
-            max_conn = max(len(self.connections.keys()), len(other.connections.depth().keys()))
+            max_conn = max(len(self.connections.keys()), len(other.connections.keys()))
             connection_distance = (connection_distance +
                                    (config.compatibility_disjoint_coefficient *
                                     disjoint_connections)) / max_conn
@@ -485,7 +486,7 @@ class DefaultGenome(object):
         input_id = choice(config.input_keys)
         for output_id in config.output_keys:
             connection = self.create_connection(config, input_id, output_id)
-            self.connections[connection.key] = connection
+            self.connections.insert(Node(connection.key, connection))
 
     def connect_fs_neat_hidden(self, config):
         """
@@ -496,7 +497,7 @@ class DefaultGenome(object):
         others = [i for i in iterkeys(self.nodes) if i not in config.input_keys]
         for output_id in others:
             connection = self.create_connection(config, input_id, output_id)
-            self.connections[connection.key] = connection
+            self.connections.insert(Node(connection.key, connection))
 
     def compute_full_connections(self, config, direct):
         """
@@ -536,13 +537,13 @@ class DefaultGenome(object):
         """
         for input_id, output_id in self.compute_full_connections(config, False):
             connection = self.create_connection(config, input_id, output_id)
-            self.connections[connection.key] = connection
+            self.connections.insert(Node(connection.key, connection))
 
     def connect_full_direct(self, config):
         """ Create a fully-connected genome, including direct input-output connections. """
         for input_id, output_id in self.compute_full_connections(config, True):
             connection = self.create_connection(config, input_id, output_id)
-            self.connections[connection.key] = connection
+            self.connections.insert(Node(connection.key, connection))
 
     def connect_partial_nodirect(self, config):
         """
@@ -554,7 +555,7 @@ class DefaultGenome(object):
         num_to_add = int(round(len(all_connections) * config.connection_fraction))
         for input_id, output_id in all_connections[:num_to_add]:
             connection = self.create_connection(config, input_id, output_id)
-            self.connections.add(connection.key, connection)
+            self.connections.insert(Node(connection.key, connection))
 
     def connect_partial_direct(self, config):
         """
@@ -567,4 +568,4 @@ class DefaultGenome(object):
         num_to_add = int(round(len(all_connections) * config.connection_fraction))
         for input_id, output_id in all_connections[:num_to_add]:
             connection = self.create_connection(config, input_id, output_id)
-            self.connections.add(connection.key, connection)
+            self.connections.insert(Node(connection.key, connection))

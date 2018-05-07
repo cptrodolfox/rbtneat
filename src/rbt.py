@@ -1,12 +1,10 @@
 
 class Node:
-    def __init__(self, key, value, left, right, color, parent):
+    def __init__(self, key=None, value=None, color= False):
         self.key = key
         self.value = value
-        self.left = left
-        self.right = right
+        self.left = self.right = self.parent = None
         self.color = color
-        self.parent = parent
 
     def __str__(self):
         return str(self.__dict__)
@@ -46,9 +44,12 @@ class Node:
                 values.extend(self.right.values())
             return values
 
+    def items(self):
+        return zip(self.keys(), self.values())
+
 class RBTree:
     def __init__(self):
-        self.sentinel = Node(None,None,None,None,False,None)
+        self.sentinel = Node()
         self.root = self.sentinel
     def left_rotate(self, x):
         y = x.right
@@ -169,7 +170,7 @@ class RBTree:
             self.transplant(z,z.right)
         elif z.right == self.sentinel:
             x = z.left
-            self.transplant(self,z,z.left)
+            self.transplant(z,z.left)
         else:
             y = self.minimum(z.right)
             y_original_color = y.color
@@ -231,8 +232,6 @@ class RBTree:
                 x = self.root
             x.color = False
                 
-                    
-
     def keys(self):
         if self.root != self.sentinel:
             return self.root.keys()
@@ -240,7 +239,10 @@ class RBTree:
     def values(self):
         if self.root != self.sentinel:
             return self.root.values()
-        
+
+    def items(self):
+        if self.root != self.sentinel:
+            return self.root.items()
             
     def __str__(self):
         if self.root == self.sentinel:
@@ -259,57 +261,57 @@ class RBTree:
 
 ## Testing of the RBTree Implementation
 T = RBTree()
-node1 = Node(1,1,None,None,False,None)
-node2 = Node(2,2,None,None,False,None)
-node3 = Node(3,3,None,None,False,None)
-node4 = Node(4,4,None,None,False,None)
-node5 = Node(5,5,None,None,False,None)
-node6 = Node(6,6,None,None,False,None)
-node7 = Node(7,7,None,None,False,None)
-node8 = Node(8,8,None,None,False,None)
-node9 = Node(9,9,None,None,False,None)
+node1 = Node(1,1)
+node2 = Node(2,2)
+node3 = Node(3,3)
+node4 = Node(4,4)
+node5 = Node(5,5)
+node6 = Node(6,6)
+node7 = Node(7,7)
+node8 = Node(8,8)
+node9 = Node(9,9)
 
 
-T.insert(node1)
-T.insert(node2)
-T.insert(node3)
-T.insert(node4)
-T.insert(node5)
-T.insert(node6)
-T.insert(node7)
-T.insert(node8)
-T.insert(node9)
+# T.insert(node1)
+# T.insert(node2)
+# T.insert(node3)
+# T.insert(node4)
+# T.insert(node5)
+# T.insert(node6)
+# T.insert(node7)
+# T.insert(node8)
+# T.insert(node9)
 
-print(T)
+# print(T)
 
-print("node 4\n")
-print(T.root)
+# print("node 4\n")
+# print(T.root)
 
-print("node 2\n")
-print(T.root.left)
+# print("node 2\n")
+# print(T.root.left)
 
-print("node 6\n")
-print(T.root.right)
+# print("node 6\n")
+# print(T.root.right)
 
-print("node 1\n")
-print(T.root.left.left)
+# print("node 1\n")
+# print(T.root.left.left)
 
-print("node 3\n")
-print(T.root.left.right)
+# print("node 3\n")
+# print(T.root.left.right)
 
-print(T.root.right.left)
-print(T.root.right.right)
-print(T.root.right.right.left)
-print(T.root.right.right.right)
+# print(T.root.right.left)
+# print(T.root.right.right)
+# print(T.root.right.right.left)
+# print(T.root.right.right.right)
 
-print("Keys: ")
-print(T.keys())
+# print("Keys: ")
+# print(T.keys())
 
-print("Values: ")
-print(T.values())
+# print("Values: ")
+# print(T.values())
 
-print("Minimum :")
-print(T.minimum(T.root.right))
+# print("Minimum :")
+# print(T.minimum(T.root.right))
 
-print("Maximum :")
-print(T.maximum())
+# print("Maximum :")
+# print(T.maximum(T.root.right))
