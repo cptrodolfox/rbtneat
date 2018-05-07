@@ -166,7 +166,7 @@ class DefaultGenome(object):
         self.key = key
 
         # (gene_key, gene) pairs for gene sets.
-        self.connections = {}
+        self.connections = RBTree()
         self.nodes = {}
 
         # Fitness results.
@@ -241,14 +241,14 @@ class DefaultGenome(object):
             parent1, parent2 = genome2, genome1
 
         # Inherit connection genes
-        for key, cg1 in iteritems(parent1.connections):
+        for key, cg1 in parent1.connections.items():
             cg2 = parent2.connections.get(key)
             if cg2 is None:
                 # Excess or disjoint gene: copy from the fittest parent.
-                self.connections[key] = cg1.copy()
+                self.connections.add(key,cg1.copy())
             else:
                 # Homologous gene: combine genes from both parents.
-                self.connections[key] = cg1.crossover(cg2)
+                self.connections.add(key,cg1.crossover(cg2))
 
         # Inherit node genes
         parent1_set = parent1.nodes
@@ -334,7 +334,7 @@ class DefaultGenome(object):
         connection.init_attributes(config)
         connection.weight = weight
         connection.enabled = enabled
-        self.connections[key] = connection
+        self.connections.add(key, connection)
 
     def mutate_add_connection(self, config):
         """
@@ -352,7 +352,7 @@ class DefaultGenome(object):
         if key in self.connections:
             # TODO: Should this be using mutation to/from rates? Hairy to configure...
             if config.check_structural_mutation_surer():
-                self.connections[key].enabled = True
+                self.connections.get(key).enabled = True ############################################################## no lo se rick
             return
 
         # Don't allow connections between two output nodes
@@ -367,7 +367,7 @@ class DefaultGenome(object):
             return
 
         cg = self.create_connection(config, in_node, out_node)
-        self.connections[cg.key] = cg
+        self.connections.add(cg.key, cg) ############################################################## cg o cg.values()
 
     def mutate_delete_node(self, config):
         # Do nothing if there are no non-output nodes.
@@ -383,7 +383,7 @@ class DefaultGenome(object):
                 connections_to_delete.add(v.key)
 
         for key in connections_to_delete:
-            del self.connections[key]
+            self.connections.remove(key)
 
         del self.nodes[del_key]
 
@@ -392,7 +392,7 @@ class DefaultGenome(object):
     def mutate_delete_connection(self):
         if self.connections:
             key = choice(list(self.connections.keys()))
-            del self.connections[key]
+            self.connections.remove(key)
 
     def distance(self, other, config):
         """
@@ -423,13 +423,13 @@ class DefaultGenome(object):
 
         # Compute connection gene differences.
         connection_distance = 0.0
-        if self.connections or other.connections:
+        if self.connections.keys() != [None] or other.connections.keys() != [None]:
             disjoint_connections = 0
-            for k2 in iterkeys(other.connections):
-                if k2 not in self.connections:
+            for k2 in other.connections.keys():
+                if k2 not in self.connections.keys():
                     disjoint_connections += 1
 
-            for k1, c1 in iteritems(self.connections):
+            for k1, c1 in self.connections.items():
                 c2 = other.connections.get(k1)
                 if c2 is None:
                     disjoint_connections += 1
@@ -437,7 +437,7 @@ class DefaultGenome(object):
                     # Homologous genes compute their own distance value.
                     connection_distance += c1.distance(c2, config)
 
-            max_conn = max(len(self.connections), len(other.connections))
+            max_conn = max(len(self.connections.keys()), len(other.connections.depth().keys()))
             connection_distance = (connection_distance +
                                    (config.compatibility_disjoint_coefficient *
                                     disjoint_connections)) / max_conn
