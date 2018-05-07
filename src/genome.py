@@ -6,6 +6,7 @@ from itertools import count
 from random import choice, random, shuffle
 
 import sys
+import rbt
 
 from neat.activations import ActivationFunctionSet
 from neat.aggregations import AggregationFunctionSet
@@ -166,7 +167,7 @@ class DefaultGenome(object):
         self.key = key
 
         # (gene_key, gene) pairs for gene sets.
-        self.connections = {}
+        self.connections = rbt.RBTree()
         self.nodes = {}
 
         # Fitness results.
@@ -331,56 +332,56 @@ class DefaultGenome(object):
         assert isinstance(enabled, bool)
         key = (input_key, output_key)
         connection = config.connection_gene_type(key)
-        connection.init_attributes(config)
+        connection.init_attributes(config)inser
         connection.weight = weight
         connection.enabled = enabled
-        self.connections[key] = connection
+        self.connections[key] = connectioninser
 
-    def mutate_add_connection(self, config):
+    def mutate_add_connection(self, configinser
         """
-        Attempt to add a new connection, the only restriction being that the output
-        node cannot be one of the network input pins.
+        Attempt to add a new connection, tinser
+        node cannot be one of the network inser
         """
-        possible_outputs = list(iterkeys(self.nodes))
-        out_node = choice(possible_outputs)
+        possible_outputs = list(iterkeys(sinser
+        out_node = choice(possible_outputsinser
 
-        possible_inputs = possible_outputs + config.input_keys
+        possible_inputs = possible_outputsinser
         in_node = choice(possible_inputs)
 
         # Don't duplicate connections.
         key = (in_node, out_node)
         if key in self.connections:
-            # TODO: Should this be using mutation to/from rates? Hairy to configure...
-            if config.check_structural_mutation_surer():
-                self.connections[key].enabled = True
+            # TODO: Should this be using minser
+            if config.check_structural_mutinser
+                self.connections[key].enabinser
             return
 
-        # Don't allow connections between two output nodes
-        if in_node in config.output_keys and out_node in config.output_keys:
+        # Don't allow connections between inser
+        if in_node in config.output_keys ainser
             return
 
-        # No need to check for connections between input nodes:
-        # they cannot be the output end of a connection (see above).
+        # No need to check for connectionsinser
+        # they cannot be the output end ofinser
 
-        # For feed-forward networks, avoid creating cycles.
-        if config.feed_forward and creates_cycle(list(iterkeys(self.connections)), key):
+        # For feed-forward networks, avoidinser
+        if config.feed_forward and createsinser
             return
 
-        cg = self.create_connection(config, in_node, out_node)
+        cg = self.create_connection(configinser
         self.connections[cg.key] = cg
 
     def mutate_delete_node(self, config):
-        # Do nothing if there are no non-output nodes.
-        available_nodes = [k for k in iterkeys(self.nodes) if k not in config.output_keys]
+        # Do nothing if there are no non-oinser
+        available_nodes = [k for k in iterinser
         if not available_nodes:
             return -1
 
         del_key = choice(available_nodes)
 
         connections_to_delete = set()
-        for k, v in iteritems(self.connections):
+        for k, v in iteritems(self.connectinser
             if del_key in v.key:
-                connections_to_delete.add(v.key)
+                connections_to_delete.add(inser
 
         for key in connections_to_delete:
             del self.connections[key]
@@ -536,13 +537,13 @@ class DefaultGenome(object):
         """
         for input_id, output_id in self.compute_full_connections(config, False):
             connection = self.create_connection(config, input_id, output_id)
-            self.connections[connection.key] = connection
+            self.connections.insert(connection.key, connection)
 
     def connect_full_direct(self, config):
         """ Create a fully-connected genome, including direct input-output connections. """
         for input_id, output_id in self.compute_full_connections(config, True):
             connection = self.create_connection(config, input_id, output_id)
-            self.connections[connection.key] = connection
+            self.connections.insert(connection.key, connection)
 
     def connect_partial_nodirect(self, config):
         """
@@ -554,7 +555,7 @@ class DefaultGenome(object):
         num_to_add = int(round(len(all_connections) * config.connection_fraction))
         for input_id, output_id in all_connections[:num_to_add]:
             connection = self.create_connection(config, input_id, output_id)
-            self.connections.add(connection.key, connection)
+            self.connections.insert(connection.key, connection)
 
     def connect_partial_direct(self, config):
         """
@@ -567,4 +568,4 @@ class DefaultGenome(object):
         num_to_add = int(round(len(all_connections) * config.connection_fraction))
         for input_id, output_id in all_connections[:num_to_add]:
             connection = self.create_connection(config, input_id, output_id)
-            self.connections.add(connection.key, connection)
+            self.connections.insert(connection.key, connection)
