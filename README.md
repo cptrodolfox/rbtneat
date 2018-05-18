@@ -4,15 +4,12 @@
 ## About ##
 
 NEAT (NeuroEvolution of Augmenting Topologies) is a method developed by Kenneth O. Stanley for evolving arbitrary neural 
-networks. This project is a Python implementation of NEAT.  It was forked from the excellent project by @MattKallada, 
-and is in the process of being updated to provide more features and a (hopefully) simpler and documented API.
+networks. This is a Python implementation of NEAT forked from the excellent project by @CodeReclaimers, with a modification in the data structure for the connections of the genome.
 
-For further information regarding general concepts and theory, please see [Selected Publications](http://www.cs.ucf.edu/~kstanley/#publications) on Stanley's website.
+Instead of using a dictionary for the connections we are using a Red-Black tree in order to proof time complexity of data structures. 
 
-`neat-python` is licensed under the [3-clause BSD license](https://opensource.org/licenses/BSD-3-Clause).
+Please see [Selected Publications](http://www.cs.ucf.edu/~kstanley/#publications) on Stanley's website in case you need more information about NEAT.
 
-## Getting Started ##
+A proper license is still missing from this repository in order to aknowledge @CodeReclaimers for their good work. 
 
-If you want to try neat-python, please check out the repository, start playing with the examples (`examples/xor` is a good place to start) and then try creating your own experiment.
-
-The documentation, which is still a work in progress, is available on [Read The Docs](http://neat-python.readthedocs.io).
+The documentation of the original repository is available on [Read The Docs](http://neat-python.readthedocs.io).
